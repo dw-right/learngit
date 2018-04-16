@@ -1,0 +1,90 @@
+抽象工厂:创建一组相关或相互依赖的对象提供一个接口，而且无须指定它们的具体类
+
+public abstract class AbstractProductA {
+    //每个产品共有的方法
+    public void shareMethod() {
+
+    }
+}
+
+public abstract class AbstractProductB {
+    //每个产品共有的方法
+    public void shareMethod() {
+
+    }
+}
+
+两个具体的产品实现类
+public class ProductA1 extends AbstractProductA {
+    ProductA1(){
+        System.out.println("产品A1的实现方法");
+    }
+}
+
+public class ProductA2 extends AbstractProductA {
+    ProductA2(){
+        System.out.println("产品A2的实现方法");
+    }
+}
+
+public class ProductB1 extends AbstractProductB {
+    ProductB1(){
+        System.out.println("产品B1的实现方法");
+    }
+}
+
+public class ProductB2 extends AbstractProductB {
+    ProductB2(){
+        System.out.println("产品B2的实现方法");
+    }
+}
+
+抽象工厂类AbstractCreator的职责是定义每个工厂要实现的功能，在通用代码中，抽象工厂类定义了两个产品的产品创建
+
+public abstract class AbstractCreator {
+    //创建A产品
+    public abstract AbstractProductA createProductA();
+    //创建B产品
+    public abstract AbstractProductB createProductB();
+    //如果有N个产品，这里就应该有N个创建方法
+}
+
+具体的实现类
+public class Creator1 extends AbstractCreator {
+    //只生产A产品
+    public AbstractProductA createProductA(){
+        return new ProductA1();
+    }
+    //只生产B产品
+    public AbstractProductB createProductB() {
+        return new ProductB1();
+    }
+}
+
+public class Creator2 extends AbstractCreator {
+    //只生产A产品
+    public AbstractProductA createProductA(){
+        return new ProductA2();
+    }
+    //只生产B产品
+    public AbstractProductB createProductB() {
+        return new ProductB2();
+    }
+}
+
+测试类：
+public class Customer {
+    public static void main(String[] args) {
+        AbstractCreator creator1 = new Creator1();
+        AbstractCreator creator2 = new Creator2();
+        AbstractProductA a1 = creator1.createProductA();
+        AbstractProductA a2 = creator2.createProductA();
+        AbstractProductB b1 = creator1.createProductB();
+        AbstractProductB b2 = creator2.createProductB();
+    }
+}
+结果：
+产品A1的实现方法
+产品A2的实现方法
+产品B1的实现方法
+产品B2的实现方法
