@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+       xsi:schemaLocation="http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+        <context:component-scan base-package="com.issc.dw">
+            <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+        </context:component-scan>
+    <context:property-placeholder location="classpath:jdbc.properties"/>
+    <bean id="ds" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+        <!-- 数据库基本信息配置 -->
+        <property name="url" value="${jdbc.url}" />
+        <property name="username" value="${jdbc.username}" />
+        <property name="password" value="${jdbc.password}" />
+        <property name="driverClassName" value="${jdbc.driver}" />
+        <property name="filters" value="${filters}" /><!--这是druid特有的-->
+        <!-- 最大连接数 -->
+        <property name="maxActive" value="${maxActive}" />
+        <!-- 初始化连接数量 -->
+        <property name="initialSize" value="${initialSize}" />
+        <!-- 配置获取连接等待超时的时间 -->
+        <property name="maxWait" value="${maxWait}" />
+        <!-- 最小空闲连接数 -->
+        <property name="minIdle" value="${minIdle}" />
+
+        <!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+        <property name="timeBetweenEvictionRunsMillis" value="${timeBetweenEvictionRunsMillis}" />
+        <!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+        <property name="minEvictableIdleTimeMillis" value="${minEvictableIdleTimeMillis}" />
+        <property name="validationQuery" value="SELECT 1" />
+        <property name="testWhileIdle" value="${testWhileIdle}" />
+        <property name="testOnBorrow" value="${testOnBorrow}" />
+        <property name="testOnReturn" value="${testOnReturn}" />
+        <property name="maxOpenPreparedStatements" value="${maxOpenPreparedStatements}" />
+        <!-- 打开连接超时功能 -->
+        <property name="removeAbandoned" value="${removeAbandoned}" />
+        <!-- 单位：秒，多少秒后回收连接-->
+        <property name="removeAbandonedTimeout" value="${removeAbandonedTimeout}" />
+        <!-- 关闭abanded连接时输出错误日志 生产环境关闭-->
+        <property name="logAbandoned" value="${logAbandoned}" />
+    </bean>
+
+    <!--第二步-->
+    <!--定义实体的工厂bean-->
+    <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="dataSource" ref="ds"/>
+        <!--实体类位置-->
+        <property name="packagesToScan" value="com.issc.dw.model"/>
+        <!--持久化单元名-->
+        <property name="persistenceUnitName" value="TestJPA" />
+        <!--JPA提供者-->
+        <property name="persistenceProviderClass" value="org.hibernate.jpa.HibernatePersistenceProvider"/>
+        <!--JPA属性-->
+        <property name="jpaProperties">
+            <props>
+                <!--配置方言-->
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</prop>
+                <!--是否输出执行的SQL-->
+                <prop key="hibernate.show_sql">true</prop>
+                <!--格式化输出Sql-->
+                <prop key="hibernate.format_sql">true</prop>
+                <!--添加一条解释型标注-->
+                <prop key="hibernate.use_sql_comments">false</prop>
+                <!--配置如何根据java模型生成数据库表结构,常用update,validate-->
+                <prop key="hibernate.hbm2ddl.auto">update</prop>
+
+            </props>
+        </property>
+    </bean>
+
+    <!--第三步-->
+    <!--定义事务管理器-->
+    <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="dataSource" ref="ds"/>
+        <property name="entityManagerFactory" ref="entityManagerFactory"/>
+    </bean>
+
+    <!--第四步-->
+    <!--定义repository接口的存放目录-->
+    <!--定义接口实现的后缀，通常用Impl-->
+    <!--定义实体工厂的引用-->
+    <!--定义事务管理器的引用-->
+
+    <jpa:repositories base-package="com.issc.dw.dao"
+                      repository-impl-postfix="Impl"
+                      entity-manager-factory-ref="entityManagerFactory"
+                      transaction-manager-ref="transactionManager"/>
+
+    <!--第五步-->
+    <!--声明采用注解的方式申明事务-->
+
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+</beans>
